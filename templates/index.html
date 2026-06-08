@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ناشر — خدمة توزيع السيرة الذاتية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <main class="page-center">
+
+    <div class="brand">
+      <div class="brand-icon">ن</div>
+      <div class="brand-text">
+        <h1>ناشر</h1>
+        <p>خدمة توزيع السيرة الذاتية</p>
+      </div>
+    </div>
+
+    <div class="card activation-card">
+      <div class="card-top">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <h2>رمز التفعيل</h2>
+        <p class="card-subtitle">أدخل رمز التفعيل الخاص بك للبدء</p>
+      </div>
+
+      <div class="card-body">
+        <div class="format-hint">
+          <span class="hint-label">صيغة الرمز:</span>
+          <span class="hint-code">6 أرقام</span>
+        </div>
+
+        <div class="input-wrap" id="code-input-wrap">
+          <input
+            type="text"
+            id="activation-code"
+            class="code-input"
+            placeholder="XXXXXX"
+            maxlength="6"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            autocorrect="off"
+          />
+        </div>
+
+        <div id="msg" class="msg hidden"></div>
+
+        <button id="validate-btn" class="btn btn-primary" onclick="validateCode()">
+          <span id="btn-text">تحقق من الرمز</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+        </button>
+
+        <div style="border-top:1px solid rgba(56,189,248,.1);margin-top:1rem;padding-top:1rem">
+          <button class="btn btn-outline" id="track-toggle" onclick="toggleTracking()" style="width:100%">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:.45rem;vertical-align:middle"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            تتبع حالة طلبك
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking card — shown when toggle clicked -->
+    <div class="card activation-card hidden" id="tracking-card" style="margin-top:.75rem">
+      <div class="card-top">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="card-icon"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        <h2>تتبع الطلب</h2>
+        <p class="card-subtitle">أدخل رمز التفعيل لمعرفة حالة إرسالك</p>
+      </div>
+
+      <div class="card-body">
+        <div class="input-wrap" id="track-input-wrap">
+          <input
+            type="text"
+            id="track-code"
+            class="code-input"
+            placeholder="XXXXXX"
+            maxlength="6"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <div id="track-msg" class="msg hidden"></div>
+
+        <button id="track-btn" class="btn btn-primary" onclick="trackJob()">
+          <span id="track-btn-text">عرض الحالة</span>
+          <span id="track-spinner" class="spinner hidden"></span>
+        </button>
+
+        <div id="track-result" class="hidden" style="margin-top:1.5rem;border-top:1px solid rgba(56,189,248,.12);padding-top:1.5rem"></div>
+      </div>
+    </div>
+
+    <div class="features-row">
+      <div class="feature">
+        <div class="feature-icon">📨</div>
+        <div class="feature-label">إرسال تلقائي</div>
+        <div class="feature-desc">مئات الشركات دفعة واحدة</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-label">خصوصية تامة</div>
+        <div class="feature-desc">الإرسال من بريدك الشخصي</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-label">تتبع مباشر</div>
+        <div class="feature-desc">نتائج لحظية أثناء الإرسال</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

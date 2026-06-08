@@ -1,0 +1,12 @@
+data/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+logs/
+*.log
+server.log
+server_err.log

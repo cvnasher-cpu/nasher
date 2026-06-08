@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ناشر — رفع قائمة الشركات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <main class="page-center">
+
+    <div class="brand">
+      <div class="brand-icon">ن</div>
+      <div class="brand-text">
+        <h1>ناشر</h1>
+        <p>لوحة الإدارة</p>
+      </div>
+    </div>
+
+    <div class="card activation-card">
+      <div class="card-top">
+        <h2>رفع قائمة الشركات</h2>
+        <p class="card-subtitle">يستبدل الملف الحالي. الطلبات الجارية غير متأثرة.</p>
+      </div>
+
+      <div class="card-body">
+        <div class="field-group" style="margin-bottom:1rem">
+          <label for="password">كلمة مرور المدير</label>
+          <input type="password" id="password" placeholder="ADMIN_PASSWORD" autocomplete="off" />
+        </div>
+
+        <div class="field-group" style="margin-bottom:1.5rem">
+          <label>ملف companies.xlsx</label>
+          <label class="file-drop" id="file-drop" for="xlsx-file">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span id="file-label">اضغط لرفع الملف أو اسحبه هنا</span>
+            <span class="file-types">XLSX فقط</span>
+            <input type="file" id="xlsx-file" accept=".xlsx" style="display:none"
+                   onchange="document.getElementById('file-label').textContent = this.files[0]?.name || 'اضغط لرفع الملف'" />
+          </label>
+        </div>
+
+        <div id="msg" class="msg hidden"></div>
+
+        <button class="btn btn-primary" onclick="upload()">
+          <span id="btn-text">رفع الملف</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem">
+      <p style="font-size:.8rem;color:var(--text-muted)">
+        الأعمدة: A (1-500) · B (501-1000) · C (1001-1500) · D (1501-2000) · E (2001-2500)
+      </p>
+    </div>
+
+  </main>
+
+  <script>
+    function upload() {
+      const pass = document.getElementById('password').value.trim();
+      const file = document.getElementById('xlsx-file').files[0];
+      const msg  = document.getElementById('msg');
+      const btn  = document.querySelector('.btn.btn-primary');
+
+      if (!pass) { showMsg(msg, 'أدخل كلمة المرور', 'error'); return; }
+      if (!file)  { showMsg(msg, 'اختر ملف xlsx', 'error'); return; }
+
+      btn.disabled = true;
+      document.getElementById('btn-text').classList.add('hidden');
+      document.getElementById('btn-spinner').classList.remove('hidden');
+      clearMsg(msg);
+
+      const fd = new FormData();
+      fd.append('password', pass);
+      fd.append('file', file);
+
+      fetch('/admin/upload-companies', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+          btn.disabled = false;
+          document.getElementById('btn-text').classList.remove('hidden');
+          document.getElementById('btn-spinner').classList.add('hidden');
+          showMsg(msg, data.message, data.ok ? 'success' : 'error');
+        })
+        .catch(() => {
+          btn.disabled = false;
+          document.getElementById('btn-text').classList.remove('hidden');
+          document.getElementById('btn-spinner').classList.add('hidden');
+          showMsg(msg, 'خطأ في الاتصال', 'error');
+        });
+    }
+
+    function showMsg(el, text, type) {
+      el.textContent = text;
+      el.className = 'msg msg-' + type;
+      el.classList.remove('hidden');
+    }
+
+    function clearMsg(el) {
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

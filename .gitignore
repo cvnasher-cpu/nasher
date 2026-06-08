@@ -1,0 +1,22 @@
+# Runtime data (persistent volume — never commit)
+data/
+codes.json
+companies.xlsx
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+venv/
+.venv/
+
+# Logs
+logs/
+*.log
+server.log
+server_err.log

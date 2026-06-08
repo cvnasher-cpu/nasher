@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ناشر — إرسال السيرة الذاتية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <header class="top-bar">
+    <div class="top-brand">
+      <span class="top-logo">ن</span>
+      <span class="top-name">ناشر</span>
+    </div>
+    <div class="package-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path><polyline points="16 7 12 3 8 7"></polyline><line x1="12" y1="3" x2="12" y2="13"></line></svg>
+      باقة <strong>{{ package }}</strong> شركة
+    </div>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- ===== FORM SECTION ===== -->
+    <section class="form-section" id="form-section">
+      <div class="section-title">
+        <h2>بيانات المتقدم</h2>
+        <p>أدخل بياناتك وارفع سيرتك الذاتية</p>
+      </div>
+
+      <form id="send-form" novalidate>
+
+        <div class="form-row two-col">
+          <div class="field-group">
+            <label for="full_name">الاسم الكامل</label>
+            <input type="text" id="full_name" name="full_name" placeholder="محمد عبدالله الأحمدي" required />
+          </div>
+          <div class="field-group">
+            <label for="job_title">المسمى الوظيفي</label>
+            <input type="text" id="job_title" name="job_title" placeholder="مهندس برمجيات" required />
+          </div>
+        </div>
+
+        <div class="form-row two-col">
+          <div class="field-group">
+            <label for="phone">رقم الجوال</label>
+            <input type="tel" id="phone" name="phone" placeholder="05XXXXXXXX" required />
+          </div>
+          <div class="field-group">
+            <label for="city">المدينة</label>
+            <select id="city" name="city" required>
+              <option value="">— اختر مدينتك —</option>
+              <option value="الرياض">الرياض</option>
+              <option value="جدة">جدة</option>
+              <option value="مكة المكرمة">مكة المكرمة</option>
+              <option value="المدينة المنورة">المدينة المنورة</option>
+              <option value="الدمام">الدمام</option>
+              <option value="الخبر">الخبر</option>
+              <option value="الظهران">الظهران</option>
+              <option value="الطائف">الطائف</option>
+              <option value="بريدة">بريدة</option>
+              <option value="تبوك">تبوك</option>
+              <option value="أبها">أبها</option>
+              <option value="خميس مشيط">خميس مشيط</option>
+              <option value="الجبيل">الجبيل</option>
+              <option value="ينبع">ينبع</option>
+              <option value="حائل">حائل</option>
+              <option value="نجران">نجران</option>
+              <option value="جازان">جازان</option>
+              <option value="الباحة">الباحة</option>
+              <option value="عرعر">عرعر</option>
+              <option value="سكاكا">سكاكا</option>
+              <option value="القطيف">القطيف</option>
+              <option value="الأحساء">الأحساء</option>
+              <option value="المجمعة">المجمعة</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="gmail">
+              بريد Gmail
+              <span class="label-note">سيُرسَل منه</span>
+            </label>
+            <input type="email" id="gmail" name="gmail" placeholder="example@gmail.com" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="app_password">
+              كلمة مرور التطبيق
+              <button type="button" class="help-btn" onclick="toggleHelp()">كيف أحصل عليها؟</button>
+            </label>
+            <div class="password-wrap">
+              <input type="password" id="app_password" name="app_password" placeholder="xxxx xxxx xxxx xxxx" required autocomplete="off" />
+              <button type="button" class="eye-btn" onclick="togglePassword()" title="إظهار/إخفاء">
+                <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- App Password help box -->
+        <div id="help-box" class="help-box hidden">
+          <div class="help-title">🔑 كيفية الحصول على كلمة مرور التطبيق</div>
+          <ol class="help-steps">
+            <li>افتح إعدادات حسابك على <strong>myaccount.google.com</strong></li>
+            <li>اذهب إلى <strong>الأمان</strong> ثم فعّل <strong>التحقق بخطوتين</strong></li>
+            <li>ابحث عن <strong>كلمات مرور التطبيقات</strong></li>
+            <li>اختر "بريد إلكتروني" ثم اضغط <strong>إنشاء</strong></li>
+            <li>انسخ الرمز المكوّن من 16 حرفاً والصقه هنا</li>
+          </ol>
+          <p class="help-note">⚠️ لا تشارك هذا الرمز مع أي شخص</p>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="cv">
+              السيرة الذاتية
+              <span class="label-note">PDF أو Word</span>
+            </label>
+            <label class="file-drop" id="file-drop" for="cv">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span id="file-label">اضغط لرفع الملف أو اسحبه هنا</span>
+              <span class="file-types">PDF, DOC, DOCX</span>
+              <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required style="display:none" onchange="onFileChange(this)" />
+            </label>
+          </div>
+        </div>
+
+        <div id="form-error" class="msg msg-error hidden"></div>
+
+        <button type="submit" class="btn btn-primary btn-send" id="send-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          <span id="send-btn-text">ابدأ الإرسال</span>
+          <span id="send-spinner" class="spinner hidden"></span>
+        </button>
+
+      </form>
+    </section>
+
+    <!-- ===== QUEUED CONFIRMATION SECTION ===== -->
+    <section class="progress-section hidden" id="queued-section">
+
+      <div class="done-box" style="display:block">
+        <div class="done-icon">✅</div>
+        <h3>تم تسجيل طلبك بنجاح!</h3>
+        <p>سيبدأ الإرسال تلقائياً. يمكنك متابعة حالة إرسالك في أي وقت.</p>
+
+        <div style="margin:1.5rem 0;padding:1rem 1.5rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:12px;text-align:center">
+          <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:.4rem">رمز متابعة طلبك</div>
+          <div id="queued-code" style="font-size:2rem;font-weight:800;letter-spacing:.25em;color:var(--primary)">——</div>
+          <div style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">احتفظ بهذا الرمز لمتابعة الإرسال</div>
+        </div>
+
+        <div class="stats-row" style="margin:1rem 0">
+          <div class="stat stat-success">
+            <div class="stat-val" id="q-total">—</div>
+            <div class="stat-label">إجمالي الشركات</div>
+          </div>
+          <div class="stat stat-remain">
+            <div class="stat-val">490</div>
+            <div class="stat-label">يومياً</div>
+          </div>
+        </div>
+
+        <a id="status-link" href="#" class="btn btn-primary" style="margin-bottom:.75rem;display:block">
+          متابعة حالة الإرسال
+        </a>
+        <a href="/" class="btn btn-outline">العودة للرئيسية</a>
+      </div>
+
+      <!-- Error state -->
+      <div id="error-box" class="done-box error-box hidden">
+        <div class="done-icon">❌</div>
+        <h3>حدث خطأ</h3>
+        <p id="error-msg"></p>
+        <a href="/" class="btn btn-outline">العودة للرئيسية</a>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

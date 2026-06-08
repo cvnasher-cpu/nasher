@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ناشر — حالة الطلب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <header class="top-bar">
+    <div class="top-brand">
+      <span class="top-logo">ن</span>
+      <span class="top-name">ناشر</span>
+    </div>
+    <a href="/" class="btn btn-outline" style="font-size:.85rem;padding:.4rem 1rem">الرئيسية</a>
+  </header>
+
+  <main class="main-layout" style="max-width:640px">
+
+    {% if not job %}
+    <!-- Job not found -->
+    <div class="card" style="text-align:center;padding:3rem 2rem">
+      <div style="font-size:3rem;margin-bottom:1rem">🔍</div>
+      <h2 style="margin-bottom:.75rem">لم يُعثر على الطلب</h2>
+      <p style="color:var(--text-muted);margin-bottom:2rem">
+        الرمز <strong style="color:var(--primary)">{{ code }}</strong> غير مرتبط بأي طلب.
+      </p>
+      <a href="/" class="btn btn-primary">العودة للرئيسية</a>
+    </div>
+
+    {% else %}
+    <!-- Job found -->
+    <div class="section-title">
+      <h2>حالة طلب الإرسال</h2>
+      <p>رمز الطلب: <strong style="color:var(--primary);letter-spacing:.15em">{{ code }}</strong></p>
+    </div>
+
+    <!-- Status badge + name -->
+    <div class="card" style="padding:1.5rem 2rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem">
+        <div>
+          <div style="font-size:1.15rem;font-weight:700">{{ job.name }}</div>
+          <div style="font-size:.9rem;color:var(--text-muted)">{{ job.job_title }}</div>
+        </div>
+        {% if job.status == 'completed' %}
+          <span class="status-badge" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3)">مكتمل ✓</span>
+        {% elif job.status == 'running' %}
+          <span class="status-badge status-sending">جاري الإرسال</span>
+        {% else %}
+          <span class="status-badge" style="background:rgba(251,191,36,.1);color:#fbbf24;border-color:rgba(251,191,36,.3)">في الانتظار</span>
+        {% endif %}
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar-wrap" style="margin-bottom:1.25rem">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width:{{ percent }}%"></div>
+        </div>
+        <span class="progress-pct">{{ percent }}%</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat stat-success">
+          <div class="stat-val">{{ sent }}</div>
+          <div class="stat-label">تم الإرسال</div>
+        </div>
+        <div class="stat stat-remain">
+          <div class="stat-val">{{ remaining }}</div>
+          <div class="stat-label">متبقي</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">{{ total }}</div>
+          <div class="stat-label">الإجمالي</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="card" style="padding:1.5rem 2rem">
+      <div style="display:grid;gap:.75rem;font-size:.9rem">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-muted)">تاريخ التسجيل</span>
+          <span>{{ job.start_date.strftime('%Y-%m-%d') }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-muted)">الباقة</span>
+          <span>{{ job.package_size }} شركة</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-muted)">الإرسال اليومي</span>
+          <span>{{ job.daily_limit }} بريد/يوم</span>
+        </div>
+        {% if completion_date %}
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-muted)">التاريخ المتوقع للاكتمال</span>
+          <span style="color:var(--primary)">{{ completion_date }}</span>
+        </div>
+        {% elif job.status == 'completed' %}
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--text-muted)">الحالة</span>
+          <span style="color:#4ade80">اكتمل الإرسال ✓</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem">
+      <button onclick="location.reload()" class="btn btn-outline" style="margin-left:.75rem">
+        تحديث الصفحة
+      </button>
+      <a href="/" class="btn btn-outline">الرئيسية</a>
+    </div>
+    {% endif %}
+
+  </main>
+
+</body>
+</html>
