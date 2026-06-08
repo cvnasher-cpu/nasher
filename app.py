@@ -19,7 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH  = os.environ.get('DATA_PATH', os.path.join(BASE_DIR, 'data'))
+DATA_PATH  = os.environ.get('DATA_PATH', './data')
 os.makedirs(DATA_PATH, exist_ok=True)
 
 DB_PATH    = os.path.join(DATA_PATH, 'nasher.db')
