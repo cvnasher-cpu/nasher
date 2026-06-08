@@ -447,6 +447,11 @@ def _check_admin(provided):
     return pw and provided == pw
 
 
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+
 @app.route('/admin/upload-codes', methods=['GET', 'POST'])
 def upload_codes():
     if request.method == 'GET':
