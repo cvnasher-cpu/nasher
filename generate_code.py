@@ -11,11 +11,11 @@ import shutil
 from datetime import datetime
 
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR   = os.environ.get('DATA_DIR', os.path.join(BASE_DIR, 'data'))
-CODES_FILE = os.path.join(DATA_DIR, 'codes.json')
+DATA_PATH  = os.environ.get('DATA_PATH', os.path.join(BASE_DIR, 'data'))
+CODES_FILE = os.path.join(DATA_PATH, 'codes.json')
 _SEED_FILE = os.path.join(BASE_DIR, 'codes.json')
 
-os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(DATA_PATH, exist_ok=True)
 
 # On first run, bootstrap from the root-level seed file if the data one doesn't exist yet
 if not os.path.exists(CODES_FILE) and os.path.exists(_SEED_FILE):

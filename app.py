@@ -19,26 +19,26 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR   = os.environ.get('DATA_DIR', os.path.join(BASE_DIR, 'data'))
-DB_PATH    = os.path.join(DATA_DIR, 'nasher.db')
-CV_DIR     = os.path.join(DATA_DIR, 'cvs')
+DATA_PATH  = os.environ.get('DATA_PATH', os.path.join(BASE_DIR, 'data'))
+DB_PATH    = os.path.join(DATA_PATH, 'nasher.db')
+CV_DIR     = os.path.join(DATA_PATH, 'cvs')
 LOGS_DIR   = os.path.join(BASE_DIR, 'logs')
 
-# codes.json lives in DATA_DIR so it survives Railway redeploys.
+# codes.json lives in DATA_PATH so it survives Railway redeploys.
 # On first boot, bootstrap from the checked-in seed file.
-CODES_FILE  = os.path.join(DATA_DIR, 'codes.json')
+CODES_FILE  = os.path.join(DATA_PATH, 'codes.json')
 _codes_seed = os.path.join(BASE_DIR, 'codes.json')
 if not os.path.exists(CODES_FILE) and os.path.exists(_codes_seed):
     import shutil as _shutil
     _shutil.copy(_codes_seed, CODES_FILE)
 
-os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(CV_DIR,   exist_ok=True)
-os.makedirs(LOGS_DIR, exist_ok=True)
+os.makedirs(DATA_PATH, exist_ok=True)
+os.makedirs(CV_DIR,    exist_ok=True)
+os.makedirs(LOGS_DIR,  exist_ok=True)
 
 
 def _companies_path():
-    p = os.path.join(DATA_DIR, 'companies.xlsx')
+    p = os.path.join(DATA_PATH, 'companies.xlsx')
     return p if os.path.exists(p) else os.path.join(BASE_DIR, 'companies.xlsx')
 
 
@@ -440,26 +440,56 @@ def status_page(code):
                            percent=percent, completion_date=completion)
 
 
-@app.route('/admin/upload-companies', methods=['GET', 'POST'])
-def upload_companies():
-    admin_pass = os.environ.get('ADMIN_PASSWORD', '')
+def _check_admin(provided):
+    """Return True only when ADMIN_PASSWORD is set and matches."""
+    pw = os.environ.get('ADMIN_PASSWORD', '')
+    return pw and provided == pw
 
+
+@app.route('/admin/upload-codes', methods=['GET', 'POST'])
+def upload_codes():
     if request.method == 'GET':
-        return render_template('admin_upload.html')
+        return render_template('admin.html')
 
     provided = request.form.get('password', '')
-    if not admin_pass or provided != admin_pass:
+    if not _check_admin(provided):
+        return jsonify({'ok': False, 'message': 'كلمة المرور غير صحيحة'}), 403
+
+    f = request.files.get('file')
+    if not f or not f.filename.endswith('.json'):
+        return jsonify({'ok': False, 'message': 'يرجى رفع ملف JSON'}), 400
+
+    try:
+        codes = json.loads(f.read().decode('utf-8'))
+        if not isinstance(codes, dict):
+            raise ValueError('يجب أن يكون الملف كائن JSON')
+    except (json.JSONDecodeError, ValueError) as e:
+        return jsonify({'ok': False, 'message': f'ملف JSON غير صحيح: {e}'}), 400
+
+    with open(CODES_FILE, 'w', encoding='utf-8') as out:
+        json.dump(codes, out, indent=2, ensure_ascii=False)
+
+    return jsonify({'ok': True, 'message': f'تم رفع codes.json بنجاح ({len(codes)} رمز)'})
+
+
+@app.route('/admin/upload-companies', methods=['GET', 'POST'])
+def upload_companies():
+    if request.method == 'GET':
+        return render_template('admin.html')
+
+    provided = request.form.get('password', '')
+    if not _check_admin(provided):
         return jsonify({'ok': False, 'message': 'كلمة المرور غير صحيحة'}), 403
 
     f = request.files.get('file')
     if not f or not f.filename.endswith('.xlsx'):
         return jsonify({'ok': False, 'message': 'يرجى رفع ملف xlsx'}), 400
 
-    dest = os.path.join(DATA_DIR, 'companies.xlsx')
+    dest = os.path.join(DATA_PATH, 'companies.xlsx')
     if os.path.exists(dest):
         os.remove(dest)
     f.save(dest)
-    return jsonify({'ok': True, 'message': 'تم رفع الملف بنجاح'})
+    return jsonify({'ok': True, 'message': 'تم رفع companies.xlsx بنجاح'})
 
 
 if __name__ == '__main__':

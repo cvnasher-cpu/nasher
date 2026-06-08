@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ناشر — لوحة الإدارة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <header class="top-bar">
+    <div class="top-brand">
+      <span class="top-logo">ن</span>
+      <span class="top-name">ناشر — الإدارة</span>
+    </div>
+    <a href="/" class="btn btn-outline" style="font-size:.85rem;padding:.4rem 1rem">الرئيسية</a>
+  </header>
+
+  <main class="main-layout" style="max-width:640px">
+
+    <!-- ── Upload codes.json ─────────────────────────────── -->
+    <div class="card" style="padding:1.75rem 2rem;margin-bottom:1.25rem">
+      <div class="section-title" style="margin-bottom:1.25rem">
+        <h2 style="font-size:1.15rem;margin:0">رفع رموز التفعيل</h2>
+        <p style="margin:.25rem 0 0;font-size:.85rem;color:var(--text-muted)">
+          يستبدل codes.json الحالي. الرموز المستخدمة مسبقاً لن تُعاد.
+        </p>
+      </div>
+
+      <div class="field-group" style="margin-bottom:1rem">
+        <label for="codes-pass">كلمة مرور المدير</label>
+        <input type="password" id="codes-pass" class="code-input"
+               style="font-size:1rem;letter-spacing:.05em"
+               placeholder="ADMIN_PASSWORD" autocomplete="off" />
+      </div>
+
+      <div class="field-group" style="margin-bottom:1.25rem">
+        <label>ملف codes.json</label>
+        <label class="file-drop" id="codes-drop" for="codes-file">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span id="codes-label">اضغط لرفع الملف أو اسحبه هنا</span>
+          <span class="file-types">JSON فقط</span>
+          <input type="file" id="codes-file" accept=".json" style="display:none"
+                 onchange="document.getElementById('codes-label').textContent = this.files[0]?.name || 'اضغط لرفع الملف'" />
+        </label>
+      </div>
+
+      <div id="codes-msg" class="msg hidden"></div>
+
+      <button class="btn btn-primary" onclick="uploadFile('codes')" style="width:100%">
+        <span id="codes-btn-text">رفع codes.json</span>
+        <span id="codes-spinner" class="spinner hidden"></span>
+      </button>
+    </div>
+
+    <!-- ── Upload companies.xlsx ──────────────────────────── -->
+    <div class="card" style="padding:1.75rem 2rem">
+      <div class="section-title" style="margin-bottom:1.25rem">
+        <h2 style="font-size:1.15rem;margin:0">رفع قائمة الشركات</h2>
+        <p style="margin:.25rem 0 0;font-size:.85rem;color:var(--text-muted)">
+          يستبدل companies.xlsx الحالي. الطلبات الجارية غير متأثرة.
+        </p>
+      </div>
+
+      <div class="field-group" style="margin-bottom:1rem">
+        <label for="companies-pass">كلمة مرور المدير</label>
+        <input type="password" id="companies-pass" class="code-input"
+               style="font-size:1rem;letter-spacing:.05em"
+               placeholder="ADMIN_PASSWORD" autocomplete="off" />
+      </div>
+
+      <div class="field-group" style="margin-bottom:1.25rem">
+        <label>ملف companies.xlsx</label>
+        <label class="file-drop" id="companies-drop" for="companies-file">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span id="companies-label">اضغط لرفع الملف أو اسحبه هنا</span>
+          <span class="file-types">XLSX فقط — الأعمدة A–E (500 لكل عمود)</span>
+          <input type="file" id="companies-file" accept=".xlsx" style="display:none"
+                 onchange="document.getElementById('companies-label').textContent = this.files[0]?.name || 'اضغط لرفع الملف'" />
+        </label>
+      </div>
+
+      <div id="companies-msg" class="msg hidden"></div>
+
+      <button class="btn btn-primary" onclick="uploadFile('companies')" style="width:100%">
+        <span id="companies-btn-text">رفع companies.xlsx</span>
+        <span id="companies-spinner" class="spinner hidden"></span>
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    const CONFIG = {
+      codes:     { endpoint: '/admin/upload-codes',     fileId: 'codes-file' },
+      companies: { endpoint: '/admin/upload-companies', fileId: 'companies-file' },
+    };
+
+    function uploadFile(type) {
+      const cfg     = CONFIG[type];
+      const pass    = document.getElementById(type + '-pass').value.trim();
+      const file    = document.getElementById(cfg.fileId).files[0];
+      const msgEl   = document.getElementById(type + '-msg');
+      const btnText = document.getElementById(type + '-btn-text');
+      const spinner = document.getElementById(type + '-spinner');
+
+      clearMsg(msgEl);
+      if (!pass) { showMsg(msgEl, 'أدخل كلمة المرور', 'error'); return; }
+      if (!file) { showMsg(msgEl, 'اختر ملفاً أولاً', 'error'); return; }
+
+      btnText.classList.add('hidden');
+      spinner.classList.remove('hidden');
+
+      const fd = new FormData();
+      fd.append('password', pass);
+      fd.append('file', file);
+
+      fetch(cfg.endpoint, { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+          btnText.classList.remove('hidden');
+          spinner.classList.add('hidden');
+          showMsg(msgEl, data.message, data.ok ? 'success' : 'error');
+          if (data.ok) {
+            document.getElementById(cfg.fileId).value = '';
+            document.getElementById(type + '-label').textContent = 'اضغط لرفع الملف أو اسحبه هنا';
+            document.getElementById(type + '-drop').classList.remove('has-file');
+          }
+        })
+        .catch(() => {
+          btnText.classList.remove('hidden');
+          spinner.classList.add('hidden');
+          showMsg(msgEl, 'خطأ في الاتصال بالخادم', 'error');
+        });
+    }
+
+    function showMsg(el, text, type) {
+      el.textContent = text;
+      el.className = 'msg msg-' + type;
+      el.classList.remove('hidden');
+    }
+
+    function clearMsg(el) {
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+
+    /* Enter key submits the matching form */
+    ['codes', 'companies'].forEach(type => {
+      document.getElementById(type + '-pass')
+        .addEventListener('keydown', e => { if (e.key === 'Enter') uploadFile(type); });
+    });
+  </script>
+</body>
+</html>
