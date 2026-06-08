@@ -20,9 +20,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # ── paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH  = os.environ.get('DATA_PATH', os.path.join(BASE_DIR, 'data'))
+os.makedirs(DATA_PATH, exist_ok=True)
+
 DB_PATH    = os.path.join(DATA_PATH, 'nasher.db')
 CV_DIR     = os.path.join(DATA_PATH, 'cvs')
 LOGS_DIR   = os.path.join(BASE_DIR, 'logs')
+
+os.makedirs(CV_DIR,   exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 # codes.json lives in DATA_PATH so it survives Railway redeploys.
 # On first boot, bootstrap from the checked-in seed file.
@@ -31,10 +36,6 @@ _codes_seed = os.path.join(BASE_DIR, 'codes.json')
 if not os.path.exists(CODES_FILE) and os.path.exists(_codes_seed):
     import shutil as _shutil
     _shutil.copy(_codes_seed, CODES_FILE)
-
-os.makedirs(DATA_PATH, exist_ok=True)
-os.makedirs(CV_DIR,    exist_ok=True)
-os.makedirs(LOGS_DIR,  exist_ok=True)
 
 
 def _companies_path():
