@@ -498,6 +498,40 @@ def upload_companies():
     return jsonify({'ok': True, 'message': 'تم رفع companies.xlsx بنجاح'})
 
 
+VALID_PACKAGES = {500, 1000, 1500, 2000, 2500}
+
+
+@app.route('/api/generate-code', methods=['POST'])
+def api_generate_code():
+    data = request.get_json(silent=True) or {}
+
+    admin_password = data.get('admin_password', '')
+    if not _check_admin(admin_password):
+        return jsonify({'ok': False, 'message': 'كلمة المرور غير صحيحة'}), 403
+
+    package = data.get('package')
+    if package not in VALID_PACKAGES:
+        return jsonify({'ok': False, 'message': f'الباقة غير صحيحة. القيم المقبولة: {sorted(VALID_PACKAGES)}'}), 400
+
+    codes = load_codes()
+
+    for _ in range(10000):
+        code = str(random.randint(100000, 999999))
+        if code not in codes:
+            break
+    else:
+        return jsonify({'ok': False, 'message': 'تعذر إنشاء رمز فريد'}), 500
+
+    codes[code] = {
+        'package':    package,
+        'used':       False,
+        'created_at': datetime.now().isoformat(),
+    }
+    save_codes(codes)
+
+    return jsonify({'ok': True, 'code': code, 'package': package})
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
