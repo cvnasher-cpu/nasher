@@ -5,7 +5,6 @@ import random
 import smtplib
 import socket
 import ssl
-import atexit
 import threading
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -16,8 +15,6 @@ from email import encoders
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 import openpyxl
-from apscheduler.schedulers.background import BackgroundScheduler
-
 # ── paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH  = os.environ.get('DATA_PATH', '/tmp/data')
@@ -296,7 +293,7 @@ def _process_job(job_id):
             db.session.commit()
             smtp = None
 
-        time.sleep(random.uniform(60, 120))
+        time.sleep(random.uniform(200, 230))
 
     if smtp:
         try:
@@ -314,19 +311,6 @@ def _process_job_in_context(job_id):
     app.logger.info(f'[thread] _process_job_in_context called for job_id={job_id}')
     with app.app_context():
         _process_job(job_id)
-
-
-def scheduler_tick():
-    with app.app_context():
-        jobs = Job.query.filter(Job.status.in_(['pending', 'running'])).all()
-        for job in jobs:
-            _process_job(job.id)
-
-
-_scheduler = BackgroundScheduler(daemon=True)
-_scheduler.add_job(scheduler_tick, 'cron', hour=9, minute=0, misfire_grace_time=3600)
-_scheduler.start()
-atexit.register(lambda: _scheduler.shutdown(wait=False))
 
 
 # ── routes ────────────────────────────────────────────────────────────────────
