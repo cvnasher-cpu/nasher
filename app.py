@@ -39,8 +39,10 @@ if not os.path.exists(CODES_FILE) and os.path.exists(_codes_seed):
 
 
 def _companies_path():
-    p = os.path.join(DATA_PATH, 'companies.xlsx')
-    return p if os.path.exists(p) else os.path.join(BASE_DIR, 'companies.xlsx')
+    base = os.path.join(BASE_DIR, 'companies.xlsx')
+    if os.path.exists(base):
+        return base
+    return os.path.join(DATA_PATH, 'companies.xlsx')
 
 
 # ── Flask & DB ────────────────────────────────────────────────────────────────

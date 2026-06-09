@@ -1,7 +1,6 @@
 # Runtime data (persistent volume — never commit)
 data/
 codes.json
-companies.xlsx
 *.pdf
 
 # Python
