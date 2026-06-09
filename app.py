@@ -196,10 +196,13 @@ def _build_msg(job, to_email, cv_data, cv_ext):
 
 # ── scheduler / job processor ─────────────────────────────────────────────────
 def _process_job(job_id):
+    app.logger.info(f'[_process_job] started for job_id={job_id}')
     job = Job.query.get(job_id)
     if not job or job.status == 'completed':
+        app.logger.info(f'[_process_job] job_id={job_id} not found or already completed — skipping')
         return
 
+    app.logger.info(f'[_process_job] job_id={job_id} status={job.status}, emails_sent={job.emails_sent}')
     job.status = 'running'
     db.session.commit()
 
@@ -260,6 +263,13 @@ def _process_job(job_id):
     if job.emails_sent >= total:
         job.status = 'completed'
         db.session.commit()
+
+
+def _process_job_in_context(job_id):
+    """Thread-safe wrapper: pushes an app context before calling _process_job."""
+    app.logger.info(f'[thread] _process_job_in_context called for job_id={job_id}')
+    with app.app_context():
+        _process_job(job_id)
 
 
 def scheduler_tick():
@@ -404,7 +414,9 @@ def submit():
     session.pop('valid_code',   None)
     session.pop('package_size', None)
 
-    threading.Thread(target=_process_job, args=(job.id,), daemon=True).start()
+    app.logger.info(f'[submit] starting background thread for job_id={job.id}')
+    threading.Thread(target=_process_job_in_context, args=(job.id,), daemon=True).start()
+    app.logger.info(f'[submit] background thread started')
 
     return jsonify({'ok': True, 'code': code, 'total': len(email_list)})
 
