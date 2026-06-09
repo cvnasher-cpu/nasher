@@ -501,6 +501,18 @@ def upload_companies():
     return jsonify({'ok': True, 'message': 'تم رفع companies.xlsx بنجاح'})
 
 
+@app.route('/test-smtp')
+def test_smtp():
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=30) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.ehlo()
+        return jsonify({'ok': True, 'message': 'SMTP connection to smtp.gmail.com:587 succeeded'})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': f'SMTP connection failed: {e}'})
+
+
 VALID_PACKAGES = {500, 1000, 1500, 2000, 2500}
 
 
