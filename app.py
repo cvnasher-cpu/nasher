@@ -128,7 +128,8 @@ def _test_smtp(gmail, app_password):
     """Verify Gmail credentials via SMTP before saving any data.
     Returns (ok: bool, error_message: str | None)."""
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=12) as smtp:
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=30) as smtp:
+            smtp.starttls()
             smtp.login(gmail, app_password)
         return True, None
     except smtplib.SMTPAuthenticationError:
@@ -218,7 +219,8 @@ def _process_job(job_id):
 
     smtp = None
     try:
-        smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=30)
+        smtp = smtplib.SMTP('smtp.gmail.com', 587, timeout=30)
+        smtp.starttls()
         smtp.login(job.client_email, job.app_password)
     except Exception as e:
         db.session.add(SendLog(job_id=job.id, email='[SMTP LOGIN]', success=False, error_msg=str(e)))
@@ -230,7 +232,8 @@ def _process_job(job_id):
             try:
                 smtp.noop()
             except Exception:
-                smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=30)
+                smtp = smtplib.SMTP('smtp.gmail.com', 587, timeout=30)
+                smtp.starttls()
                 smtp.login(job.client_email, job.app_password)
 
             smtp.send_message(_build_msg(job, to_email, cv_data, cv_ext))
