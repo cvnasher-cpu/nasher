@@ -488,12 +488,21 @@ def status_page(code):
     sent       = job.emails_sent
     remaining  = max(0, total - sent)
     percent    = round(sent / total * 100) if total else 0
-    days_left  = (remaining + 489) // 490 if remaining > 0 else 0
-    completion = (datetime.utcnow() + timedelta(days=days_left)).strftime('%Y-%m-%d') if days_left > 0 else None
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    sent_today  = SendLog.query.filter(
+        SendLog.job_id  == job.id,
+        SendLog.success == True,
+        SendLog.timestamp >= today_start
+    ).count()
+
+    seconds_left = remaining * 215
+    completion   = (datetime.utcnow() + timedelta(seconds=seconds_left)).strftime('%Y-%m-%d') if remaining > 0 else None
 
     return render_template('status.html', job=job, code=code,
                            total=total, sent=sent, remaining=remaining,
-                           percent=percent, completion_date=completion)
+                           percent=percent, completion_date=completion,
+                           sent_today=sent_today)
 
 
 def _check_admin(provided):
