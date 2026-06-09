@@ -6,6 +6,7 @@ import smtplib
 import socket
 import ssl
 import atexit
+import threading
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -402,6 +403,8 @@ def submit():
 
     session.pop('valid_code',   None)
     session.pop('package_size', None)
+
+    threading.Thread(target=_process_job, args=(job.id,), daemon=True).start()
 
     return jsonify({'ok': True, 'code': code, 'total': len(email_list)})
 
