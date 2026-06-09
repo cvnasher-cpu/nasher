@@ -151,38 +151,82 @@ def _test_smtp(gmail, app_password):
 
 def _build_msg(job, to_email, cv_data, cv_ext):
     safe_name = job.name.replace(' ', '_')
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['From']    = f'{job.name} <{job.client_email}>'
     msg['To']      = to_email
-    msg['Subject'] = f'طلب توظيف - {job.job_title} - {job.name}'
+    msg['Subject'] = f'طلب توظيف — {job.job_title}'
 
-    body = f"""السادة المسؤولين عن التوظيف،
+    html = f"""<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Tahoma,sans-serif;direction:rtl;text-align:right;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
-السلام عليكم ورحمة الله وبركاته،
+          <!-- header -->
+          <tr>
+            <td style="background:#1a73e8;padding:28px 36px;">
+              <p style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">طلب توظيف — {job.job_title}</p>
+            </td>
+          </tr>
 
-يسعدني أن أتقدم بطلب توظيف إلى مؤسستكم الكريمة للعمل في مجال {job.job_title}.
+          <!-- greeting -->
+          <tr>
+            <td style="padding:32px 36px 16px;color:#333333;font-size:15px;line-height:1.8;">
+              <p style="margin:0 0 12px;">السلام عليكم ورحمة الله وبركاته،</p>
+              <p style="margin:0;">
+                {job.name} أتقدّم إليكم بطلب فرصة وظيفية مناسبة ضمن منشأتكم الكريمة بمسمى وظيفي
+                <strong>{job.job_title}</strong>.
+              </p>
+            </td>
+          </tr>
 
-━━━━━━━━━━━━━━━━━━━━━━
-البيانات الشخصية:
-━━━━━━━━━━━━━━━━━━━━━━
-الاسم الكامل      : {job.name}
-المسمى الوظيفي    : {job.job_title}
-المدينة           : {job.city or ''}
-رقم الجوال        : {job.phone or ''}
-البريد الإلكتروني : {job.client_email}
-━━━━━━━━━━━━━━━━━━━━━━
+          <!-- details table -->
+          <tr>
+            <td style="padding:16px 36px 28px;">
+              <p style="margin:0 0 12px;font-size:15px;font-weight:bold;color:#1a73e8;border-bottom:2px solid #1a73e8;padding-bottom:6px;">بيانات المتقدم</p>
+              <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;font-size:14px;color:#444444;">
+                <tr style="background:#f8f9ff;">
+                  <td style="width:40%;font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">الاسم الكامل</td>
+                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.name}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">المسمى الوظيفي</td>
+                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.job_title}</td>
+                </tr>
+                <tr style="background:#f8f9ff;">
+                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">رقم الجوال</td>
+                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.phone or '—'}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">البريد الإلكتروني</td>
+                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.client_email}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-مرفق طيه سيرتي الذاتية للاطلاع عليها، وأرجو أن تجدوا في مؤهلاتي وخبراتي ما يتوافق مع متطلبات العمل لديكم.
+          <!-- closing -->
+          <tr>
+            <td style="padding:0 36px 32px;color:#333333;font-size:15px;line-height:1.8;">
+              <p style="margin:0 0 8px;">نتطلع إلى تشريفنا بالتواصل في أي وقت.</p>
+              <p style="margin:0;">مع خالص الشكر والتقدير.</p>
+            </td>
+          </tr>
 
-أتطلع إلى فرصة للتعريف بنفسي وإثبات كفاءتي لخدمة مؤسستكم الكريمة.
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
 
-وتفضلوا بقبول فائق الاحترام والتقدير،
-
-{job.name}
-{job.phone or ''}
-{job.client_email}"""
-
-    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
 
     if cv_data:
         part = MIMEBase('application', 'octet-stream')
