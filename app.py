@@ -248,7 +248,7 @@ def _process_job(job_id):
             db.session.commit()
             smtp = None
 
-        time.sleep(random.uniform(3, 5))
+        time.sleep(random.uniform(60, 120))
 
     if smtp:
         try:
@@ -386,12 +386,19 @@ def submit():
     )
     db.session.add(job)
 
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        if os.path.exists(cv_path):
+            os.remove(cv_path)
+        return jsonify({'ok': False, 'message': f'خطأ في حفظ البيانات: {e}'}), 500
+
+    # Mark code used only after the job is fully committed to the database.
     codes[code]['used']    = True
     codes[code]['used_at'] = datetime.now().isoformat()
     codes[code]['used_by'] = gmail
     save_codes(codes)
-
-    db.session.commit()
 
     session.pop('valid_code',   None)
     session.pop('package_size', None)
