@@ -226,10 +226,10 @@ def _build_msg(job, to_email, cv_data, cv_ext):
     msg.attach(MIMEText(html, 'html', 'utf-8'))
 
     if cv_data:
-        part = MIMEBase('application', 'octet-stream')
+        part = MIMEBase('application', 'pdf')
         part.set_payload(cv_data)
         encoders.encode_base64(part)
-        part.add_header('Content-Disposition', f'attachment; filename="{safe_name}_CV.{cv_ext}"')
+        part.add_header('Content-Disposition', f'attachment; filename="{safe_name}_CV.pdf"')
         msg.attach(part)
 
     return msg
