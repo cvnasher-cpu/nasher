@@ -138,9 +138,35 @@
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="field-group">
+            <label for="custom_subject">عنوان الرسالة</label>
+            <input type="text" id="custom_subject" name="custom_subject" placeholder="أدخل عنوان الرسالة" dir="rtl" />
+            <button type="button" class="btn-fill-default" onclick="fillDefaultSubject()">إدخال العنوان الافتراضي</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="custom_text">محتوى الرسالة</label>
+            <textarea id="custom_text" name="custom_text" rows="6" placeholder="أدخل محتوى الرسالة" dir="rtl"></textarea>
+            <button type="button" class="btn-fill-default" onclick="fillDefaultBody()">إدخال النص الافتراضي</button>
+            <p class="helper-note">💡 يُفضّل تغيير النص الافتراضي ولو قليلاً (إعادة صياغة بسيطة) حتى تصل الإيميلات بشكل صحيح وتتجنب فلاتر السبام.</p>
+          </div>
+        </div>
+
+        <div class="warning-notice">
+          ⚠️ تأكد جيداً من العنوان ومحتوى الرسالة قبل البدء — بعد بدء الإرسال لا يمكن تعديلها.
+        </div>
+
+        <div class="confirm-row">
+          <button type="button" class="btn btn-outline" id="confirm-btn" onclick="confirmText()">تأكيد النص</button>
+          <button type="button" class="btn btn-outline hidden" id="edit-btn" onclick="editText()">تعديل النص</button>
+        </div>
+
         <div id="form-error" class="msg msg-error hidden"></div>
 
-        <button type="submit" class="btn btn-primary btn-send" id="send-btn">
+        <button type="submit" class="btn btn-primary btn-send" id="send-btn" disabled>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           <span id="send-btn-text">ابدأ الإرسال</span>
           <span id="send-spinner" class="spinner hidden"></span>

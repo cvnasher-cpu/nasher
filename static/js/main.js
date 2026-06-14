@@ -181,6 +181,59 @@ if (codeInput) {
 
 /* ===== Main Form Page ===== */
 
+const DEFAULT_SUBJECT = 'طلب توظيف – التقديم على الوظائف الشاغرة لديكم';
+const DEFAULT_BODY =
+  'فريق التوظيف المحترم،\n' +
+  'أنا [اسمك]، خريج في تخصص [تخصصك] ولدي خبرة واسعة في هذا المجال. أبحث حالياً عن فرصة عمل تناسب تخصصي وتتيح لي تطبيق مهاراتي وخبراتي في بيئة مهنية متطورة.\n' +
+  'أرفقت سيرتي الذاتية مع هذه الرسالة للتعرف على مؤهلاتي وخبراتي السابقة، وأتطلع إلى فرصة للعمل والمساهمة في تعزيز نجاح شركتكم الموقرة.';
+
+function fillDefaultSubject() {
+  const el = document.getElementById('custom_subject');
+  if (el && !el.readOnly) el.value = DEFAULT_SUBJECT;
+}
+
+function fillDefaultBody() {
+  const el = document.getElementById('custom_text');
+  if (el && !el.readOnly) el.value = DEFAULT_BODY;
+}
+
+function confirmText() {
+  const subjectEl  = document.getElementById('custom_subject');
+  const bodyEl     = document.getElementById('custom_text');
+  const errEl      = document.getElementById('form-error');
+  const sendBtn    = document.getElementById('send-btn');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const editBtn    = document.getElementById('edit-btn');
+
+  if (!subjectEl || !bodyEl) return;
+
+  if (!subjectEl.value.trim() || !bodyEl.value.trim()) {
+    showMsg(errEl, 'يرجى ملء عنوان الرسالة ومحتواها قبل التأكيد', 'error');
+    return;
+  }
+
+  clearMsg(errEl);
+  subjectEl.readOnly = true;
+  bodyEl.readOnly    = true;
+  if (sendBtn)    sendBtn.disabled = false;
+  if (confirmBtn) confirmBtn.classList.add('hidden');
+  if (editBtn)    editBtn.classList.remove('hidden');
+}
+
+function editText() {
+  const subjectEl  = document.getElementById('custom_subject');
+  const bodyEl     = document.getElementById('custom_text');
+  const sendBtn    = document.getElementById('send-btn');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const editBtn    = document.getElementById('edit-btn');
+
+  if (subjectEl) subjectEl.readOnly = false;
+  if (bodyEl)    bodyEl.readOnly    = false;
+  if (sendBtn)   sendBtn.disabled   = true;
+  if (confirmBtn) confirmBtn.classList.remove('hidden');
+  if (editBtn)    editBtn.classList.add('hidden');
+}
+
 function toggleHelp() {
   const box = document.getElementById('help-box');
   if (box) box.classList.toggle('hidden');
@@ -245,13 +298,15 @@ function startSend() {
 
   clearMsg(errEl);
 
-  const full_name    = field('full_name');
-  const job_title    = field('job_title');
-  const phone        = field('phone');
-  const gmail        = field('gmail');
-  const app_password = field('app_password');
-  const city         = field('city');
-  const cv           = document.getElementById('cv');
+  const full_name      = field('full_name');
+  const job_title      = field('job_title');
+  const phone          = field('phone');
+  const gmail          = field('gmail');
+  const app_password   = field('app_password');
+  const city           = field('city');
+  const custom_subject = field('custom_subject');
+  const custom_text    = (document.getElementById('custom_text') || {}).value?.trim() || '';
+  const cv             = document.getElementById('cv');
 
   if (!full_name || !job_title || !phone || !gmail || !app_password || !city) {
     showMsg(errEl, 'يرجى تعبئة جميع الحقول المطلوبة', 'error');
@@ -263,19 +318,26 @@ function startSend() {
     return;
   }
 
+  if (!custom_subject || !custom_text) {
+    showMsg(errEl, 'يرجى ملء عنوان الرسالة ومحتواها وتأكيدهما', 'error');
+    return;
+  }
+
   if (!cv || !cv.files || cv.files.length === 0) {
     showMsg(errEl, 'يرجى رفع ملف السيرة الذاتية', 'error');
     return;
   }
 
   const formData = new FormData();
-  formData.append('full_name',    full_name);
-  formData.append('job_title',    job_title);
-  formData.append('phone',        phone);
-  formData.append('gmail',        gmail);
-  formData.append('app_password', app_password);
-  formData.append('city',         city);
-  formData.append('cv',           cv.files[0]);
+  formData.append('full_name',      full_name);
+  formData.append('job_title',      job_title);
+  formData.append('phone',          phone);
+  formData.append('gmail',          gmail);
+  formData.append('app_password',   app_password);
+  formData.append('city',           city);
+  formData.append('custom_subject', custom_subject);
+  formData.append('custom_text',    custom_text);
+  formData.append('cv',             cv.files[0]);
 
   // Show "checking Gmail..." — SMTP test can take up to 12 seconds
   const btnText = document.getElementById('send-btn-text');

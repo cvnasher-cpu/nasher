@@ -11,6 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from email.header import Header
 
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
@@ -71,6 +72,8 @@ class Job(db.Model):
     status          = db.Column(db.String(20), default='pending')
     start_date      = db.Column(db.DateTime, default=datetime.utcnow)
     daily_limit     = db.Column(db.Integer, default=490)
+    custom_subject  = db.Column(db.Text)
+    custom_text     = db.Column(db.Text)
     send_logs       = db.relationship('SendLog', backref='job', lazy=True)
 
 
@@ -86,6 +89,14 @@ class SendLog(db.Model):
 
 with app.app_context():
     db.create_all()
+    from sqlalchemy import text as _sa_text
+    with db.engine.connect() as _conn:
+        for _col in ['custom_subject TEXT', 'custom_text TEXT']:
+            try:
+                _conn.execute(_sa_text(f'ALTER TABLE jobs ADD COLUMN {_col}'))
+                _conn.commit()
+            except Exception:
+                pass
 
 
 # ── codes helpers ─────────────────────────────────────────────────────────────
@@ -148,82 +159,17 @@ def _test_smtp(gmail, app_password):
 
 def _build_msg(job, to_email, cv_data, cv_ext):
     safe_name = job.name.replace(' ', '_')
-    msg = MIMEMultipart('alternative')
+    msg = MIMEMultipart()
     msg['From']    = f'{job.name} <{job.client_email}>'
     msg['To']      = to_email
-    msg['Subject'] = f'طلب توظيف — {job.job_title}'
+    msg['Subject'] = Header(job.custom_subject or '', 'utf-8')
 
-    html = f"""<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Tahoma,sans-serif;direction:rtl;text-align:right;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-
-          <!-- header -->
-          <tr>
-            <td style="background:#1a73e8;padding:28px 36px;">
-              <p style="margin:0;color:#ffffff;font-size:22px;font-weight:bold;">طلب توظيف — {job.job_title}</p>
-            </td>
-          </tr>
-
-          <!-- greeting -->
-          <tr>
-            <td style="padding:32px 36px 16px;color:#333333;font-size:15px;line-height:1.8;">
-              <p style="margin:0 0 12px;">السلام عليكم ورحمة الله وبركاته،</p>
-              <p style="margin:0;">
-                {job.name} أتقدّم إليكم بطلب فرصة وظيفية مناسبة ضمن منشأتكم الكريمة بمسمى وظيفي
-                <strong>{job.job_title}</strong>.
-              </p>
-            </td>
-          </tr>
-
-          <!-- details table -->
-          <tr>
-            <td style="padding:16px 36px 28px;">
-              <p style="margin:0 0 12px;font-size:15px;font-weight:bold;color:#1a73e8;border-bottom:2px solid #1a73e8;padding-bottom:6px;">بيانات المتقدم</p>
-              <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;font-size:14px;color:#444444;">
-                <tr style="background:#f8f9ff;">
-                  <td style="width:40%;font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">الاسم الكامل</td>
-                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.name}</td>
-                </tr>
-                <tr>
-                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">المسمى الوظيفي</td>
-                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.job_title}</td>
-                </tr>
-                <tr style="background:#f8f9ff;">
-                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">رقم الجوال</td>
-                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.phone or '—'}</td>
-                </tr>
-                <tr>
-                  <td style="font-weight:bold;border:1px solid #e0e0e0;padding:10px 14px;">البريد الإلكتروني</td>
-                  <td style="border:1px solid #e0e0e0;padding:10px 14px;">{job.client_email}</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- closing -->
-          <tr>
-            <td style="padding:0 36px 32px;color:#333333;font-size:15px;line-height:1.8;">
-              <p style="margin:0 0 8px;">نتطلع إلى تشريفنا بالتواصل في أي وقت.</p>
-              <p style="margin:0;">مع خالص الشكر والتقدير.</p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>"""
-
-    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    body_html = (
+        '<div dir="rtl" style="direction:rtl;text-align:right;font-family:Arial,sans-serif;">'
+        + (job.custom_text or '').replace('\n', '<br>')
+        + '</div>'
+    )
+    msg.attach(MIMEText(body_html, 'html', 'utf-8'))
 
     if cv_data:
         part = MIMEBase('application', 'pdf')
@@ -250,7 +196,7 @@ def _process_job(job_id):
     email_list = json.loads(job.email_list)
     total      = len(email_list)
     start_idx  = job.emails_sent
-    end_idx    = min(start_idx + job.daily_limit, total)
+    end_idx    = total
     batch      = email_list[start_idx:end_idx]
 
     if not batch:
@@ -372,16 +318,21 @@ def submit():
     if Job.query.filter_by(activation_code=code).first():
         return jsonify({'ok': False, 'message': 'تم تسجيل هذا الرمز مسبقاً'}), 400
 
-    name         = request.form.get('full_name', '').strip()
-    job_title    = request.form.get('job_title', '').strip()
-    city         = request.form.get('city', '').strip()
-    phone        = request.form.get('phone', '').strip()
-    gmail        = request.form.get('gmail', '').strip()
-    app_password = request.form.get('app_password', '').strip()
-    cv_file      = request.files.get('cv')
+    name           = request.form.get('full_name', '').strip()
+    job_title      = request.form.get('job_title', '').strip()
+    city           = request.form.get('city', '').strip()
+    phone          = request.form.get('phone', '').strip()
+    gmail          = request.form.get('gmail', '').strip()
+    app_password   = request.form.get('app_password', '').strip()
+    custom_subject = request.form.get('custom_subject', '').strip()
+    custom_text    = request.form.get('custom_text', '').strip()
+    cv_file        = request.files.get('cv')
 
     if not all([name, job_title, gmail, app_password, cv_file]):
         return jsonify({'ok': False, 'message': 'يرجى ملء جميع الحقول المطلوبة'}), 400
+
+    if not custom_subject or not custom_text:
+        return jsonify({'ok': False, 'message': 'يرجى ملء عنوان الرسالة ومحتواها'}), 400
 
     if not gmail.endswith('@gmail.com'):
         return jsonify({'ok': False, 'message': 'يرجى إدخال بريد Gmail صحيح'}), 400
@@ -422,6 +373,8 @@ def submit():
         email_list      = json.dumps(email_list, ensure_ascii=False),
         status          = 'pending',
         daily_limit     = 490,
+        custom_subject  = custom_subject,
+        custom_text     = custom_text,
     )
     db.session.add(job)
 
